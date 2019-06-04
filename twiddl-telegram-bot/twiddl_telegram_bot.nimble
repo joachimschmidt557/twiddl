@@ -11,3 +11,4 @@ bin           = @["twiddl_telegram_bot"]
 # Dependencies
 
 requires "nim >= 0.19.9"
+requires "telebot >= 0.5.9"
