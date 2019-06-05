@@ -2,10 +2,10 @@
 
 version       = "0.1.0"
 author        = "joachimschmidt557"
-description   = "Trigger twiddl actions per webhook"
+description   = "Control and monitor twiddl per REST API"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["twiddl_trigger"]
+bin           = @["twiddl_rest"]
 
 
 
