@@ -1,14 +1,11 @@
 import asynchttpserver, asyncdispatch
-import osproc
+import osproc, strutils
 
 import apiv1
 
 proc requestHandler(req:Request) {.async.} =
-  if req.url.path == "/test":
-    await req.respond(Http200, "asdf")
-  if req.url.path == "/trigger-make":
-    await req.respond(Http200, "Triggered make")
-    discard execCmd("make")
+  if req.url.path.startswith("/v1"):
+    apiv1.requestHandler(req)
   else:
     await req.respond(Http404, "Not a valid API call")
 
