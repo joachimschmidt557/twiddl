@@ -9,5 +9,7 @@ proc buildStatistics*(tw:TwiddlEnv): string =
   var result = rope()
   result.add(header)
   result.add("<h1>Statistics</h1>\n")
+  result.add("<h2>Success rate</h2>\n")
+  result.add("<h2>Past 30 days</h2>\n")
   result.add(footer)
   return $result
