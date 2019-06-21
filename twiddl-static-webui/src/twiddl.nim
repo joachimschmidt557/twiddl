@@ -19,6 +19,7 @@ type
 
   Build* = object
     id*:int
+    comment*:string
     timeStarted*:Option[DateTime]
     timeFinished*:Option[DateTime]
     status*:BuildStatus
@@ -38,6 +39,7 @@ proc readTwiddlfile*(path:string): Twiddlfile =
 proc readBuildFile(path:string): Build =
   let jsonNode = parseJson(readFile(path))
   result.id = jsonNode["id"].getInt()
+  result.comment = jsonNode["comment"].getStr()
   result.status = jsonNode["status"].getStr().parseEnum(bsUnknown)
 
 proc saveBuildFile(b:Build, path:string) =

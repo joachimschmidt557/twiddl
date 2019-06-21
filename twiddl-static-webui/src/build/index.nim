@@ -8,9 +8,19 @@ proc buildIndex*(tw:TwiddlEnv): string =
     footer = slurp("common-footer.html")
   var result = rope()
   result.add(header)
+
   result.add("<h1>Latest build</h1>\n")
+  if tw.builds.len > 0:
+    let latestBuild = tw.builds[tw.builds.high]
+  else:
+    result.add("No builds yet!\n")
+
   result.add("<h1>Latest builds</h1>\n")
-  for build in tw.builds:
-    discard
+  if tw.builds.len > 0:
+    for build in tw.builds:
+      discard
+  else:
+    result.add("No builds yet!\n")
+
   result.add(footer)
   return $result
