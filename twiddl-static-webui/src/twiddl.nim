@@ -1,7 +1,7 @@
-import os, json, strutils, times, options
+import os, json, strutils, times, options, sequtils
 
 const
-  timeFmt = initTimeFormat("yyyy-MM-dd")
+  timeFmt = initTimeFormat("yyyy-MM-dd HH:mm:ss")
 
 type
   TwiddlEnv* = object
@@ -62,13 +62,23 @@ proc readTwiddlfile(path:string): Twiddlfile =
     result.jobs.add(Job(commands:commands, artifacts:artifacts))
 
 proc readBuildFile(path:string): Build =
-  let jsonNode = parseJson(readFile(path))
+  let
+    jsonNode = parseJson(readFile(path))
+    job = jsonNode["job"]
 
   result.id = jsonNode["id"].getInt()
   result.comment = jsonNode["comment"].getStr()
   result.status = jsonNode["status"].getStr().parseEnum(bsUnknown)
+
+  for command in job["commands"].items:
+    result.job.commands.add(command.getStr())
+  for artifact in job["artifacts"].items:
+    result.job.artifacts.add(artifact.getStr())
+
   if jsonNode.hasKey("startTime"):
     result.timeStarted = some(jsonNode["startTime"].getStr().parse(timeFmt))
+  if jsonNode.hasKey("finishTime"):
+    result.timeFinished = some(jsonNode["finishTime"].getStr().parse(timeFmt))
   for log in jsonNode["logs"].items:
     result.logs.add(Log(path:log.getStr()))
   for artifact in jsonNode["artifacts"].items:
@@ -78,10 +88,17 @@ proc saveBuildFile(b:Build, path:string) =
   var result = %* {"id" : b.id,
     "comment" : b.comment,
     "status" : $b.status}
+
+  result["job"] = %* {"commands" : b.job.commands,
+    "artifacts" : b.job.artifacts}
+
   if b.timeStarted.isSome:
     result["startTime"] = % b.timeStarted.get.format(timeFmt)
   if b.timeFinished.isSome:
-    result["startTime"] = % b.timeFinished.get.format(timeFmt)
+    result["finishTime"] = % b.timeFinished.get.format(timeFmt)
+
+  result["logs"] = % b.logs.mapIt(it.path)
+  result["artifacts"] = % b.artifacts.mapIt(it.path)
   writeFile(path, $result)
 
 proc openBuilds(path:string): seq[Build] =
