@@ -18,10 +18,14 @@ type
     jobs*:seq[Job]
 
   Job* = object
+    ## Holds all data representing a specific job,
+    ## something that can be run
+    name*:string
     commands*:seq[string]
     artifacts*:seq[string]
 
   BuildStatus* = enum
+    ## All possible states of a build
     bsUnknown,
     bsPlanned,
     bsPending,
@@ -31,6 +35,8 @@ type
     bsFinishedFailed
 
   Build* = object
+    ## Holds all data tied to a build
+    path*:string
     id*:int
     comment*:string
     job*:Job
@@ -41,9 +47,12 @@ type
     artifacts*:seq[Artifact]
 
   Artifact* = object
+    ## Holds all data tied to a build artifact
+    ## which was generated
     path*:string
 
   Log* = object
+    ## Holds all data tied to a build log
     path*:string
 
 proc readTwiddlfile(path:string): Twiddlfile =
@@ -55,11 +64,20 @@ proc readTwiddlfile(path:string): Twiddlfile =
     var
       commands:seq[string]
       artifacts:seq[string]
+
     for command in job["commands"].items:
       commands.add(command.getStr())
     for artifact in job["artifacts"].items:
       artifacts.add(artifact.getStr())
-    result.jobs.add(Job(commands:commands, artifacts:artifacts))
+
+    result.jobs.add(Job(name:job["name"].getStr(), commands:commands, artifacts:artifacts))
+
+proc saveTwiddlfile*(twf:Twiddlfile) = 
+  ## Saves the Twiddlfile
+  var result = %* {"name" : twf.name}
+
+  for jobs in twf.jobs:
+    discard
 
 proc readBuildFile(path:string): Build =
   let
@@ -70,6 +88,7 @@ proc readBuildFile(path:string): Build =
   result.comment = jsonNode["comment"].getStr()
   result.status = jsonNode["status"].getStr().parseEnum(bsUnknown)
 
+  result.job.name = job["name"].getStr()
   for command in job["commands"].items:
     result.job.commands.add(command.getStr())
   for artifact in job["artifacts"].items:
@@ -84,12 +103,14 @@ proc readBuildFile(path:string): Build =
   for artifact in jsonNode["artifacts"].items:
     result.artifacts.add(Artifact(path:artifact.getStr()))
 
-proc saveBuildFile(b:Build, path:string) =
+proc saveBuildFile*(b:Build) =
+  ## Saves the build configuration
   var result = %* {"id" : b.id,
     "comment" : b.comment,
     "status" : $b.status}
 
-  result["job"] = %* {"commands" : b.job.commands,
+  result["job"] = %* {"name" : b.job.name,
+    "commands" : b.job.commands,
     "artifacts" : b.job.artifacts}
 
   if b.timeStarted.isSome:
@@ -99,7 +120,7 @@ proc saveBuildFile(b:Build, path:string) =
 
   result["logs"] = % b.logs.mapIt(it.path)
   result["artifacts"] = % b.artifacts.mapIt(it.path)
-  writeFile(path, $result)
+  writeFile(b.path, $result)
 
 proc openBuilds(path:string): seq[Build] =
   for kind, file in walkDir(path):
