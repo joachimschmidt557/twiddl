@@ -127,7 +127,7 @@ proc openBuilds(path:string): seq[Build] =
     result.add(readBuildFile(file))
 
 proc openTwiddlEnv*(path:string): TwiddlEnv =
-  ## Opens a twiddle environment
+  ## Opens a twiddl environment
   result.path = path
   result.twiddlfile = readTwiddlfile(path / "twiddlfile")
   result.builds = openBuilds(path / ".twiddl" / "builds")
