@@ -1,6 +1,7 @@
 import os, json, strutils, times, options, sequtils
 
 const
+  ## The time format used throughout twiddl
   timeFmt = initTimeFormat("yyyy-MM-dd HH:mm:ss")
 
 type
@@ -32,7 +33,7 @@ type
     bsRunning,
     bsFinishedSuccessful,
     bsFinishedCanceled,
-    bsFinishedFailed
+    bsFinishedFailed,
 
   Build* = object
     ## Holds all data tied to a build
@@ -74,10 +75,14 @@ proc readTwiddlfile(path:string): Twiddlfile =
 
 proc saveTwiddlfile*(twf:Twiddlfile) = 
   ## Saves the Twiddlfile
-  var result = %* {"name" : twf.name}
+  var jsonResult = %* {"name" : twf.name}
 
   for jobs in twf.jobs:
-    discard
+    jsonResult["jobs"].add( %* {"name" : jobs.name,
+      "commands" : jobs.commands,
+      "artifacts" : jobs.artifacts} )
+
+  writeFile(twf.path, $jsonResult)
 
 proc readBuildFile(path:string): Build =
   let
@@ -98,6 +103,7 @@ proc readBuildFile(path:string): Build =
     result.timeStarted = some(jsonNode["startTime"].getStr().parse(timeFmt))
   if jsonNode.hasKey("finishTime"):
     result.timeFinished = some(jsonNode["finishTime"].getStr().parse(timeFmt))
+
   for log in jsonNode["logs"].items:
     result.logs.add(Log(path:log.getStr()))
   for artifact in jsonNode["artifacts"].items:
@@ -105,22 +111,22 @@ proc readBuildFile(path:string): Build =
 
 proc saveBuildFile*(b:Build) =
   ## Saves the build configuration
-  var result = %* {"id" : b.id,
+  var jsonResult = %* {"id" : b.id,
     "comment" : b.comment,
     "status" : $b.status}
 
-  result["job"] = %* {"name" : b.job.name,
+  jsonResult["job"] = %* {"name" : b.job.name,
     "commands" : b.job.commands,
     "artifacts" : b.job.artifacts}
 
   if b.timeStarted.isSome:
-    result["startTime"] = % b.timeStarted.get.format(timeFmt)
+    jsonResult["startTime"] = % b.timeStarted.get.format(timeFmt)
   if b.timeFinished.isSome:
-    result["finishTime"] = % b.timeFinished.get.format(timeFmt)
+    jsonResult["finishTime"] = % b.timeFinished.get.format(timeFmt)
 
-  result["logs"] = % b.logs.mapIt(it.path)
-  result["artifacts"] = % b.artifacts.mapIt(it.path)
-  writeFile(b.path, $result)
+  jsonResult["logs"] = % b.logs.mapIt(it.path)
+  jsonResult["artifacts"] = % b.artifacts.mapIt(it.path)
+  writeFile(b.path, $jsonResult)
 
 proc openBuilds(path:string): seq[Build] =
   for kind, file in walkDir(path):
