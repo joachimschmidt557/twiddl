@@ -1,9 +1,7 @@
-import osproc
-
 import twiddl
 
-proc createBuild(job:Job): Build =
-  result.job = job
+type Runner* = object
+  createBuild*: proc (job:Job): Build
 
 proc runBuild(build:var Build) =
   if build.status == bsFinishedSuccessful or
@@ -26,7 +24,3 @@ proc runBuild(build:var Build) =
   # Finish
   build.status = bsFinishedSuccessful
   build.saveBuildfile()
-
-proc rerunBuild(build:Build) =
-  var newBuild = createBuild(build.job)
-  runBuild(newBuild)

@@ -1,4 +1,4 @@
-import ropes
+import htmlgen, ropes
 
 import ../twiddl
 
@@ -9,11 +9,11 @@ proc buildStatistics*(tw:TwiddlEnv): string =
   var result = rope()
   result.add(header)
 
-  result.add("<h1>Statistics</h1>\n")
+  result.add(h1("Statistics"))
   result.addf("Total number of builds: $1 \n", [tw.builds.len.rope])
-  result.add("<h2>Success rate</h2>\n")
+  result.add(h2("Success rate"))
 
-  result.add("<h2>Past 30 days</h2>\n")
+  result.add(h2("Past 30 days"))
 
   result.add(footer)
 

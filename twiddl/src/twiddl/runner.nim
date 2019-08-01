@@ -13,8 +13,9 @@ type Runner* = ref object
 # Procedures which can be applied to any runner
 #
 
-proc newBuild(r:Runner, j:Job): Build =
+proc newBuild(j:Job): Build =
   result.job = j
+  result.status = bsPlanned
   result.saveBuildFile()
 
 proc rerunBuild(r:Runner, b:Build) =

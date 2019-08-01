@@ -1,4 +1,4 @@
-import ropes
+import htmlgen, ropes
 
 import ../twiddl
 
@@ -9,7 +9,7 @@ proc buildListView*(tw:TwiddlEnv):string =
   var result = rope()
   result.add(header)
 
-  result.add("<h1>All builds</h1>\n")
+  result.add(h1("All builds"))
   if tw.builds.len > 0:
     result.add("<table>\n")
 

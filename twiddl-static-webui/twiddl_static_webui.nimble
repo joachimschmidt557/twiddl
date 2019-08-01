@@ -12,4 +12,3 @@ bin           = @["twiddl_static_webui"]
 # Dependencies
 
 requires "nim >= 0.20.0"
-requires "yaml >= 0.9.1"
