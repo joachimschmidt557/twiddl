@@ -1,4 +1,9 @@
+import tables
+
 import twiddl
+
+const
+  runners = {:}.newTable
 
 type Runner* = ref object
   ## A runner is an implementation of this

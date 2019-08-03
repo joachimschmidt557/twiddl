@@ -22,6 +22,7 @@ type
     ## Holds all data representing a specific job,
     ## something that can be run
     name*:string
+    runner*:string
     commands*:seq[string]
     artifacts*:seq[string]
 
@@ -57,6 +58,7 @@ type
     path*:string
 
 proc readTwiddlfile(path:string): Twiddlfile =
+  ## Parse this twiddlfile
   result.path = path
   let jsonNode = parseJson(readFile(path))
 
@@ -71,7 +73,10 @@ proc readTwiddlfile(path:string): Twiddlfile =
     for artifact in job["artifacts"].items:
       artifacts.add(artifact.getStr())
 
-    result.jobs.add(Job(name:job["name"].getStr(), commands:commands, artifacts:artifacts))
+    result.jobs.add(Job(name:job["name"].getStr(),
+                        runner:job["runner"].getStr(),
+                        commands:commands,
+                        artifacts:artifacts))
 
 proc saveTwiddlfile*(twf:Twiddlfile) = 
   ## Saves the Twiddlfile
@@ -79,12 +84,14 @@ proc saveTwiddlfile*(twf:Twiddlfile) =
 
   for jobs in twf.jobs:
     jsonResult["jobs"].add( %* {"name" : jobs.name,
+      "runner" : jobs.runner,
       "commands" : jobs.commands,
       "artifacts" : jobs.artifacts} )
 
   writeFile(twf.path, $jsonResult)
 
 proc readBuildFile(path:string): Build =
+  ## Parse this build file
   let
     jsonNode = parseJson(readFile(path))
     job = jsonNode["job"]
@@ -94,6 +101,7 @@ proc readBuildFile(path:string): Build =
   result.status = jsonNode["status"].getStr().parseEnum(bsUnknown)
 
   result.job.name = job["name"].getStr()
+  result.job.runner = job["runner"].getStr()
   for command in job["commands"].items:
     result.job.commands.add(command.getStr())
   for artifact in job["artifacts"].items:
@@ -116,6 +124,7 @@ proc saveBuildFile*(b:Build) =
     "status" : $b.status}
 
   jsonResult["job"] = %* {"name" : b.job.name,
+    "runner" : b.job.runner,
     "commands" : b.job.commands,
     "artifacts" : b.job.artifacts}
 
@@ -129,6 +138,7 @@ proc saveBuildFile*(b:Build) =
   writeFile(b.path, $jsonResult)
 
 proc openBuilds(path:string): seq[Build] =
+  ## Parse all build files in this path
   for kind, file in walkDir(path):
     result.add(readBuildFile(file))
 
