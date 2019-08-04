@@ -60,7 +60,7 @@ type
 proc readTwiddlfile(path:string): Twiddlfile =
   ## Parse this twiddlfile
   result.path = path
-  let jsonNode = parseJson(readFile(path))
+  let jsonNode = parseFile(path)
 
   result.name = jsonNode["name"].getStr()
   for job in jsonNode["jobs"].items:
@@ -93,7 +93,7 @@ proc saveTwiddlfile*(twf:Twiddlfile) =
 proc readBuildFile(path:string): Build =
   ## Parse this build file
   let
-    jsonNode = parseJson(readFile(path))
+    jsonNode = parseFile(path)
     job = jsonNode["job"]
 
   result.id = jsonNode["id"].getInt()
