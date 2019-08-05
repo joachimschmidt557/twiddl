@@ -9,8 +9,11 @@ type
     ## Holds all important data about a twiddl
     ## environment
     path*:string
+    buildsPath*:string
+    artifactsPath*:string
     twiddlfile*:Twiddlfile
     builds*:seq[Build]
+
   Twiddlfile* = object
     ## Holds all configuration data for a twiddl
     ## environment
@@ -145,5 +148,7 @@ proc openBuilds(path:string): seq[Build] =
 proc openTwiddlEnv*(path:string): TwiddlEnv =
   ## Opens a twiddl environment
   result.path = path
+  result.buildsPath = path / ".twiddl" / "builds"
+  result.artifactsPath = path / ".twiddl" / "artifacts"
   result.twiddlfile = readTwiddlfile(path / "twiddlfile")
-  result.builds = openBuilds(path / ".twiddl" / "builds")
+  result.builds = openBuilds(result.buildsPath)

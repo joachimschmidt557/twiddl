@@ -1,14 +1,16 @@
+import os, osproc
+
 import twiddl
+import twiddl/runners
 
-type Runner* = object
-  createBuild*: proc (job:Job): Build
-
-proc runBuild(build:var Build) =
+proc runBuildInternal(build:var Build) =
   if build.status == bsFinishedSuccessful or
      build.status == bsFinishedCanceled or
      build.status == bsFinishedFailed:
-    build.status = bsRunning
-    build.saveBuildfile()
+    return
+
+  build.status = bsRunning
+  build.saveBuildfile()
 
   # Run commands
   for command in build.job.commands:
@@ -24,3 +26,8 @@ proc runBuild(build:var Build) =
   # Finish
   build.status = bsFinishedSuccessful
   build.saveBuildfile()
+
+let
+  unsupervisedRunner* = Runner(runBuild: proc(build:var Build) = runBuildInternal(build),
+    cancelBuild: proc(build:var Build) = discard,
+    listRunningBuilds: proc (): seq[Build] = @[])
