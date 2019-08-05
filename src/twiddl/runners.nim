@@ -1,24 +1,35 @@
+## Procedures which can be applied to any runner
+import options
+
 import twiddl
 
-type
-  Runner* = object
-    ## A runner is an implementation of this
-    ## interface. It provides procedures
-    ## for starting new builds, canceling builds
-    ## and querying running builds
-    runBuild*: proc (build: var Build): void
-    cancelBuild*: proc (build: var Build): void
-    listRunningBuilds*: proc (): seq[Build]
+import twiddl/runner
+import twiddl/builtin
 
-#
-# Procedures which can be applied to any runner
-#
+proc genNewBuildId*(env:TwiddlEnv): int =
+  ## Generates a new build ID
+  env.builds.len
 
-proc newBuild*(j:Job): Build =
+proc newBuild*(env:TwiddlEnv, j:Job): Build =
+  ## Creates a new build from this job
+  result.id = env.genNewBuildId
   result.job = j
   result.status = bsPlanned
   result.saveBuildFile()
 
-proc rerunBuild*(r:Runner, b:Build) =
-  var newBuild = newBuild(b.job)
-  r.runBuild(newBuild)
+proc runBuild*(env:Twiddlenv, b:var Build) =
+  ## Selects the appropriate runner
+  ## ands instructs that runner to run this
+  ## build
+  let r = matchRunner(b.job.runner)
+  if r.isSome:
+    r.get.runBuild(b)
+  else:
+    b.status = bsFinishedFailed
+    b.saveBuildFile()
+
+proc rerunBuild*(env:Twiddlenv, b:Build) =
+  ## Creates a new build with the same
+  ## configuration and runs it
+  var newB = newBuild(env, b.job)
+  runBuild(env, newB)

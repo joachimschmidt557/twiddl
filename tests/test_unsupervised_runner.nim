@@ -1,7 +1,7 @@
 import unittest, os
 
 import twiddl
-import twiddl/[runners, unsupervised]
+import twiddl/runners
 
 test "run empty job":
   let job = Job(name: "Job",

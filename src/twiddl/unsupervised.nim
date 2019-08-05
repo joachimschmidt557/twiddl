@@ -1,7 +1,7 @@
 import os, osproc
 
 import twiddl
-import twiddl/runners
+import twiddl/runner
 
 proc runBuildInternal(build:var Build) =
   if build.status == bsFinishedSuccessful or
