@@ -66,7 +66,7 @@ proc readTwiddlfile(path:string): Twiddlfile =
   let jsonNode = parseFile(path)
 
   result.name = jsonNode["name"].getStr()
-  for job in jsonNode["jobs"].items:
+  for name, job in jsonNode["jobs"].pairs:
     var
       commands:seq[string]
       artifacts:seq[string]
@@ -76,7 +76,7 @@ proc readTwiddlfile(path:string): Twiddlfile =
     for artifact in job["artifacts"].items:
       artifacts.add(artifact.getStr())
 
-    result.jobs.add(Job(name:job["name"].getStr(),
+    result.jobs.add(Job(name:name,
                         runner:job["runner"].getStr(),
                         commands:commands,
                         artifacts:artifacts))
@@ -86,10 +86,9 @@ proc saveTwiddlfile*(twf:Twiddlfile) =
   var jsonResult = %* {"name" : twf.name}
 
   for jobs in twf.jobs:
-    jsonResult["jobs"].add( %* {"name" : jobs.name,
-      "runner" : jobs.runner,
+    jsonResult["jobs"]{jobs.name} = %* {"runner" : jobs.runner,
       "commands" : jobs.commands,
-      "artifacts" : jobs.artifacts} )
+      "artifacts" : jobs.artifacts}
 
   writeFile(twf.path, $jsonResult)
 
