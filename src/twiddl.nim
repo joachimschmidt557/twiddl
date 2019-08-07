@@ -54,10 +54,12 @@ type
   Artifact* = object
     ## Holds all data tied to a build artifact
     ## which was generated
+    id*:int
     path*:string
 
   Log* = object
     ## Holds all data tied to a build log
+    id*:int
     path*:string
 
 proc readTwiddlfile(path:string): Twiddlfile =
@@ -114,10 +116,10 @@ proc readBuildFile(path:string): Build =
   if jsonNode.hasKey("finishTime"):
     result.timeFinished = some(jsonNode["finishTime"].getStr().parse(timeFmt))
 
-  for log in jsonNode["logs"].items:
-    result.logs.add(Log(path:log.getStr()))
-  for artifact in jsonNode["artifacts"].items:
-    result.artifacts.add(Artifact(path:artifact.getStr()))
+  for id, log in jsonNode["logs"].pairs:
+    result.logs.add(Log(id:id.parseInt, path:log.getStr()))
+  for id, artifact in jsonNode["artifacts"].pairs:
+    result.artifacts.add(Artifact(id:id.parseInt, path:artifact.getStr()))
 
 proc saveBuildFile*(b:Build) =
   ## Saves the build configuration
@@ -135,8 +137,11 @@ proc saveBuildFile*(b:Build) =
   if b.timeFinished.isSome:
     jsonResult["finishTime"] = % b.timeFinished.get.format(timeFmt)
 
-  jsonResult["logs"] = % b.logs.mapIt(it.path)
-  jsonResult["artifacts"] = % b.artifacts.mapIt(it.path)
+  for log in b.logs:
+    jsonResult["logs"][$log.id] = % log.path
+  for artifact in b.artifacts:
+    jsonResult["artifacts"][$artifact.id] = % artifact.path
+
   writeFile(b.path, $jsonResult)
 
 proc openBuilds(path:string): seq[Build] =
@@ -149,5 +154,6 @@ proc openTwiddlEnv*(path:string): TwiddlEnv =
   result.path = path
   result.buildsPath = path / ".twiddl" / "builds"
   result.artifactsPath = path / ".twiddl" / "artifacts"
+  result.logsPath = path / ".twiddl" / "logs"
   result.twiddlfile = readTwiddlfile(path / "twiddlfile")
   result.builds = openBuilds(result.buildsPath)
