@@ -9,14 +9,19 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
     artifactsDir = env.artifactsPath / $build.id
   var
     internalLog = rope()
+    error = false
 
   if build.status == bsFinishedSuccessful or
      build.status == bsFinishedCanceled or
      build.status == bsFinishedFailed:
     return
 
+  internalLog.add("twiddl's unsupervised runner.\n")
+  internalLog.add("Starting build\n")
+
   build.status = bsRunning
   build.timeStarted = some now()
+  build.logs.add(Log(id:0, path:logDir / "runner.log"))
   build.saveBuildfile()
 
   # Create dirs if necessary
@@ -33,9 +38,9 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
     build.logs.add(Log(id:i + 1, path:logPath))
 
     if exitCode != 0:
-      build.status = bsFinishedFailed
-      build.saveBuildFile()
-      return
+      internalLog.addf("Command $1 exited with non-zero exit code. Aborting", [i.rope])
+      error = true
+      break
 
   # Handle artifacts
   for i, artifact in build.job.artifacts:
@@ -43,16 +48,18 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
       let path = artifactsDir / $i
       moveFile(artifact, path)
       build.artifacts.add(Artifact(id:i, originalPath:artifact, path:path))
+    else:
+      internalLog.addf("Artifact $1 doesn't exist. Skipping.\n", [artifact.rope])
 
   # Finish
-  build.status = bsFinishedSuccessful
+  build.status = if error: bsFinishedFailed else: bsFinishedSuccessful
   build.timeFinished = some now()
   build.saveBuildfile()
 
+  internalLog.add("Finished\n")
+
   # Save internal log
   writeFile(logDir / "runner.log", $internalLog)
-  build.logs.add(Log(id:0, path:logDir / "runner.log"))
-  build.saveBuildFile()
 
 let
   unsupervisedRunner* = Runner(runBuild: proc(env: TwiddlEnv, build:var Build) = runBuildInternal(env, build),
