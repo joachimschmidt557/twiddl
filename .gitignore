@@ -1,0 +1,3 @@
+tests/test_parse_buildfile
+tests/test_parse_twiddlfile
+tests/test_unsupervised_runner

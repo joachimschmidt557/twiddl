@@ -9,10 +9,10 @@ type
     ## Holds all important data about a twiddl
     ## environment
     path*:string
+    twiddlfile*:Twiddlfile
     buildsPath*:string
     artifactsPath*:string
     logsPath*:string
-    twiddlfile*:Twiddlfile
     builds*:seq[Build]
 
   Twiddlfile* = object
@@ -138,8 +138,11 @@ proc saveBuildFile*(b:Build) =
   if b.timeFinished.isSome:
     jsonResult["finishTime"] = % b.timeFinished.get.format(timeFmt)
 
+  jsonResult["logs"] = newJObject()
   for log in b.logs:
     jsonResult["logs"][$log.id] = % log.path
+
+  jsonResult["artifacts"] = newJObject()
   for artifact in b.artifacts:
     jsonResult["artifacts"][$artifact.id] = % artifact.path
 
@@ -153,8 +156,14 @@ proc openBuilds(path:string): seq[Build] =
 proc openTwiddlEnv*(path:string): TwiddlEnv =
   ## Opens a twiddl environment
   result.path = path
+  result.twiddlfile = readTwiddlfile(path / "twiddlfile")
   result.buildsPath = path / ".twiddl" / "builds"
   result.artifactsPath = path / ".twiddl" / "artifacts"
   result.logsPath = path / ".twiddl" / "logs"
-  result.twiddlfile = readTwiddlfile(path / "twiddlfile")
+
+  # Create dirs if necessary
+  createDir(result.buildsPath)
+  createDir(result.artifactsPath)
+  createDir(result.logsPath)
+
   result.builds = openBuilds(result.buildsPath)

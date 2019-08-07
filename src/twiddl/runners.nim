@@ -1,5 +1,5 @@
 ## Procedures which can be applied to any runner
-import options
+import os, options
 
 import twiddl
 
@@ -13,6 +13,7 @@ proc genNewBuildId*(env:TwiddlEnv): int =
 proc newBuild*(env:TwiddlEnv, j:Job): Build =
   ## Creates a new build from this job
   result.id = env.genNewBuildId
+  result.path = env.buildsPath / ($result.id).addFileExt("json")
   result.job = j
   result.status = bsPlanned
   result.saveBuildFile()
