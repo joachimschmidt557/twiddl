@@ -1,4 +1,4 @@
-import os, json, strutils, times, options, sequtils, tables
+import os, json, strutils, times, options, sequtils, tables, algorithm
 
 const
   ## The time format used throughout twiddl
