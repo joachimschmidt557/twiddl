@@ -1,9 +1,12 @@
-import os, osproc
+import os, osproc, ropes
 
 import twiddl
 import twiddl/runner
 
-proc runBuildInternal(build:var Build) =
+proc runBuildInternal(env: TwiddlEnv, build:var Build) =
+  var
+    internalLog = rope()
+
   if build.status == bsFinishedSuccessful or
      build.status == bsFinishedCanceled or
      build.status == bsFinishedFailed:
@@ -21,13 +24,17 @@ proc runBuildInternal(build:var Build) =
       return
 
   # Handle artifacts
-
+  for artifact in build.job.artifacts:
+    discard
 
   # Finish
   build.status = bsFinishedSuccessful
   build.saveBuildfile()
 
+  # Save internal log
+  writeFile(env.logsPath / "runner.log", $internalLog)
+
 let
-  unsupervisedRunner* = Runner(runBuild: proc(build:var Build) = runBuildInternal(build),
-    cancelBuild: proc(build:var Build) = discard,
+  unsupervisedRunner* = Runner(runBuild: proc(env: TwiddlEnv, build:var Build) = runBuildInternal(env, build),
+    cancelBuild: proc(env: TwiddlEnv, build:var Build) = discard,
     listRunningBuilds: proc (): seq[Build] = @[])

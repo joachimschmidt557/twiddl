@@ -23,9 +23,10 @@ proc runBuild*(env:Twiddlenv, b:var Build) =
   ## build
   let r = matchRunner(b.job.runner)
   if r.isSome:
-    r.get.runBuild(b)
+    r.get.runBuild(env, b)
   else:
     b.status = bsFinishedFailed
+    b.comment = "Failed: No matching runner found.\n" & b.comment
     b.saveBuildFile()
 
 proc rerunBuild*(env:Twiddlenv, b:Build) =

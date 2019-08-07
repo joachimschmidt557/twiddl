@@ -11,6 +11,7 @@ type
     path*:string
     buildsPath*:string
     artifactsPath*:string
+    logsPath*:string
     twiddlfile*:Twiddlfile
     builds*:seq[Build]
 
