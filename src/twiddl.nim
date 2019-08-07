@@ -89,6 +89,7 @@ proc saveTwiddlfile*(twf:Twiddlfile) =
   ## Saves the Twiddlfile
   var jsonResult = %* {"name" : twf.name}
 
+  jsonResult["jobs"] = newJObject()
   for job in twf.jobs.values:
     jsonResult["jobs"]{job.name} = %* {"runner" : job.runner,
       "commands" : job.commands,
@@ -154,8 +155,7 @@ proc saveBuildFile*(b:Build) =
 
 proc openBuilds(path:string): seq[Build] =
   ## Parse all build files in this path
-  for kind, file in walkDir(path):
-    result.add(readBuildFile(file))
+  toSeq(walkDir(path)).sorted.mapIt(readBuildFile(it[1]))
 
 proc openTwiddlEnv*(path:string): TwiddlEnv =
   ## Opens a twiddl environment
