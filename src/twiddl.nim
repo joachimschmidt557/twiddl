@@ -1,4 +1,4 @@
-import os, json, strutils, times, options, sequtils
+import os, json, strutils, times, options, sequtils, tables
 
 const
   ## The time format used throughout twiddl
@@ -20,7 +20,7 @@ type
     ## environment
     path*:string
     name*:string
-    jobs*:seq[Job]
+    jobs*:Table[string, Job]
 
   Job* = object
     ## Holds all data representing a specific job,
@@ -80,19 +80,19 @@ proc readTwiddlfile(path:string): Twiddlfile =
     for artifact in job["artifacts"].items:
       artifacts.add(artifact.getStr())
 
-    result.jobs.add(Job(name:name,
-                        runner:job["runner"].getStr(),
-                        commands:commands,
-                        artifacts:artifacts))
+    result.jobs[name] = Job(name:name,
+                            runner:job["runner"].getStr(),
+                            commands:commands,
+                            artifacts:artifacts)
 
 proc saveTwiddlfile*(twf:Twiddlfile) = 
   ## Saves the Twiddlfile
   var jsonResult = %* {"name" : twf.name}
 
-  for jobs in twf.jobs:
-    jsonResult["jobs"]{jobs.name} = %* {"runner" : jobs.runner,
-      "commands" : jobs.commands,
-      "artifacts" : jobs.artifacts}
+  for job in twf.jobs.values:
+    jsonResult["jobs"]{job.name} = %* {"runner" : job.runner,
+      "commands" : job.commands,
+      "artifacts" : job.artifacts}
 
   writeFile(twf.path, $jsonResult)
 
