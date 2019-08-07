@@ -56,6 +56,7 @@ type
     ## Holds all data tied to a build artifact
     ## which was generated
     id*:int
+    originalPath*:string
     path*:string
 
   Log* = object
@@ -120,7 +121,9 @@ proc readBuildFile(path:string): Build =
   for id, log in jsonNode["logs"].pairs:
     result.logs.add(Log(id:id.parseInt, path:log.getStr()))
   for id, artifact in jsonNode["artifacts"].pairs:
-    result.artifacts.add(Artifact(id:id.parseInt, path:artifact.getStr()))
+    result.artifacts.add(Artifact(id:id.parseInt,
+                                  originalPath:artifact["original"].getStr(),
+                                  path:artifact["path"].getStr()))
 
 proc saveBuildFile*(b:Build) =
   ## Saves the build configuration
@@ -144,7 +147,8 @@ proc saveBuildFile*(b:Build) =
 
   jsonResult["artifacts"] = newJObject()
   for artifact in b.artifacts:
-    jsonResult["artifacts"][$artifact.id] = % artifact.path
+    jsonResult["artifacts"][$artifact.id] = %* {"original" : artifact.originalPath,
+      "path" : artifact.path}
 
   writeFile(b.path, $jsonResult)
 

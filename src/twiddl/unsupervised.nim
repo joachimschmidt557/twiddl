@@ -42,7 +42,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
     if existsFile(artifact):
       let path = artifactsDir / $i
       moveFile(artifact, path)
-      build.artifacts.add(Artifact(id:i, path:path))
+      build.artifacts.add(Artifact(id:i, originalPath:artifact, path:path))
 
   # Finish
   build.status = bsFinishedSuccessful
