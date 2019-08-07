@@ -1,4 +1,10 @@
 {
 	"name":"twiddl",
-	"jobs": {},
+	"jobs": {
+		"test": {
+			"runner": "unsupervised",
+			"commands": ["nimble test"],
+			"artifacts": [],
+		},
+	},
 }
