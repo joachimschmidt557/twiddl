@@ -38,7 +38,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
     build.logs.add(Log(id:i + 1, path:logPath))
 
     if exitCode != 0:
-      internalLog.addf("Command $1 exited with non-zero exit code. Aborting", [i.rope])
+      internalLog.addf("Command $1 exited with non-zero exit code. Aborting\n", [i.rope])
       error = true
       break
 
