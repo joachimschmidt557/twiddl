@@ -155,7 +155,8 @@ proc saveBuildFile*(b:Build) =
 
 proc openBuilds(path:string): seq[Build] =
   ## Parse all build files in this path
-  toSeq(walkDir(path)).mapIt(it[1]).sorted(proc (x,y: string): int = cmp(x.splitFile[1].parseInt, y.splitFile[1].parseInt)).mapIt(readBuildFile(it))
+  let cmpFilenameAsInt = proc (x,y: string): int = cmp(x.splitFile[1].parseInt, y.splitFile[1].parseInt)
+  toSeq(walkDir(path)).mapIt(it[1]).sorted(cmpFilenameAsInt).mapIt(readBuildFile(it))
 
 proc openTwiddlEnv*(path:string): TwiddlEnv =
   ## Opens a twiddl environment
