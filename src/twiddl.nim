@@ -64,7 +64,7 @@ type
     id*:int
     path*:string
 
-proc statusHumanReadable(status:BuildStatus): string =
+proc statusHumanReadable*(status:BuildStatus): string =
   ## Return a human-friendly description
   ## of this status
   case status
