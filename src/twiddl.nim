@@ -64,6 +64,18 @@ type
     id*:int
     path*:string
 
+proc statusHumanReadable(status:BuildStatus): string =
+  ## Return a human-friendly description
+  ## of this status
+  case status
+  of bsUnknown: "Unknown"
+  of bsPlanned: "Planned"
+  of bsPending: "Pending"
+  of bsRunning: "Running"
+  of bsFinishedSuccessful: "Successful"
+  of bsFinishedFailed: "Failed"
+  of bsFinishedCanceled: "Canceled"
+
 proc readTwiddlfile(path:string): Twiddlfile =
   ## Parse this twiddlfile
   result.path = path
