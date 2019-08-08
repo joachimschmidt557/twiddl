@@ -34,7 +34,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
       (output, exitCode) = execCmdEx(command)
       logPath = logDir / ($(i + 1)).addFileExt("log")
 
-    writeFile(logPath , output)
+    writeFile(logPath, output)
     build.logs.add(Log(id:i + 1, path:logPath))
 
     if exitCode != 0:
