@@ -83,19 +83,10 @@ proc readTwiddlfile(path:string): Twiddlfile =
 
   result.name = jsonNode["name"].getStr()
   for name, job in jsonNode["jobs"].pairs:
-    var
-      commands:seq[string]
-      artifacts:seq[string]
-
-    for command in job["commands"].items:
-      commands.add(command.getStr())
-    for artifact in job["artifacts"].items:
-      artifacts.add(artifact.getStr())
-
     result.jobs[name] = Job(name:name,
                             runner:job["runner"].getStr(),
-                            commands:commands,
-                            artifacts:artifacts)
+                            commands:toSeq(job["commands"].items).mapIt(it.getStr()),
+                            artifacts:toSeq(job["artifacts"].items).mapIt(it.getStr()))
 
 proc saveTwiddlfile*(twf:Twiddlfile) = 
   ## Saves the Twiddlfile
@@ -121,10 +112,8 @@ proc readBuildFile(path:string): Build =
 
   result.job.name = job["name"].getStr()
   result.job.runner = job["runner"].getStr()
-  for command in job["commands"].items:
-    result.job.commands.add(command.getStr())
-  for artifact in job["artifacts"].items:
-    result.job.artifacts.add(artifact.getStr())
+  result.job.commands = toSeq(job["commands"].items).mapIt(it.getStr())
+  result.job.artifacts = toSeq(job["artifacts"].items).mapIt(it.getStr())
 
   if jsonNode.hasKey("startTime"):
     result.timeStarted = some(jsonNode["startTime"].getStr().parse(timeFmt))
