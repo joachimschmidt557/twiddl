@@ -21,7 +21,7 @@ proc execLxcContainer(c:Container, cmd:string) =
   discard execCmd("lxc exec " & c.name & " -- " & cmd)
 
 proc pushLxcContainer(c:Container, item:string, dest:string) =
-  discard execCmd("lxc file push " & item & " -r -p " & c.name & "/" & dest)
+  discard execCmd("lxc file push " & item & " " & c.name & dest & " -r -p")
 
 proc containerForBuild(env:TwiddlEnv, build:Build): Container =
   Container(image: "ubuntu:18.04", name:"tw-" & env.twiddlfile.name & "-" & $build.id)
