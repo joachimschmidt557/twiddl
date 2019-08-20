@@ -1,3 +1,6 @@
+## Provides a simple, unsafe runner which
+## executes jobs directly
+
 import os, osproc, ropes, times, options
 
 import twiddl
