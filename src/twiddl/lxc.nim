@@ -56,7 +56,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
     c = containerForBuild(env, build)
 
   c.launchLxcContainer()
-  c.pushLxcContainer(env.path, "/tmp/twiddl/")
+  c.pushLxcContainer(env.path, "/tmp/")
 
   # Run commands
   for i, command in build.job.commands:
