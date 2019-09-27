@@ -87,6 +87,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
 
   # Delete container
   c.stopLxcContainer()
+  #c.deleteLxcContainer()
 
   # Finish
   build.status = if error: bsFinishedFailed else: bsFinishedSuccessful
