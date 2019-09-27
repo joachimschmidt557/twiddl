@@ -86,7 +86,7 @@ proc runBuildInternal(env: TwiddlEnv, build:var Build) =
   #    internalLog.addf("Artifact $1 doesn't exist. Skipping.\n", [artifact.rope])
 
   # Delete container
-  c.stopLxcContainer()
+  #c.stopLxcContainer()
   #c.deleteLxcContainer()
 
   # Finish
